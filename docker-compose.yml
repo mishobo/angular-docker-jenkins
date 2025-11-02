@@ -1,0 +1,11 @@
+services:
+
+  angular:
+    image: angular:latest
+    container_name: angular
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    ports:
+      - "80:80"
+      - "4200:4200"
