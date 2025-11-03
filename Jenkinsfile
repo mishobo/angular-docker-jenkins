@@ -1,30 +1,31 @@
-node {
-    def app
-
-    stage('Clone repository') {
-      
-
-        checkout scm
-    }
-
-    stage('Build image') {
-
-       app = docker.build("mishobo/test")
-    }
-
-    stage('Test image') {
-  
-
-        app.inside {
-            sh 'echo "Tests passed"'
+pipeline {
+    agent any
+    stages {
+        stage('Checkout') {
+            steps {
+                git branch: 'main', url: 'https://github.com/mishobo/angular-docker-jenkins.git'
+            }
         }
-    }
-
-    stage('Push image') {
-        
-        docker.withRegistry('https://registry.hub.docker.com', 'git') {
-            app.push("${env.BUILD_NUMBER}")
-            app.push("latest")
+        stage('Build') {
+            steps {
+                script {
+                    dockerImage = docker.build("mishobo/angular:${env.BUILD_NUMBER}")
+                }
+            }
+        }
+        stage('Test') {
+            steps {
+                sh 'docker run --rm mishobo/angular:${env.BUILD_NUMBER} ./run-tests.sh'
+            }
+        }
+        stage('Push') {
+            steps {
+                script {
+                    docker.withRegistry('https://index.docker.io/v1/', 'dockerhub-credentials') {
+                        dockerImage.push()
+                    }
+                }
+            }
         }
     }
 }
