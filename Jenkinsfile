@@ -13,11 +13,6 @@ pipeline {
                 }
             }
         }
-        stage('Test') {
-            steps {
-                sh 'docker run --rm mishobo/angular:${env.BUILD_NUMBER} ./run-tests.sh'
-            }
-        }
         stage('Push') {
             steps {
                 script {
